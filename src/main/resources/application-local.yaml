@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5431/ride_booking_service_db
+    username: ride_booking_service
+    password: "0000"
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.default_schema: public
+
+jwt:
+  secret:
+    key: dUM3SDl1VThkWWZKOXNQNW1EMGFMNm5LMnFYMXRSOXlXM3pFOHZNNHBRN3JCMWRGNWhKNnNMOG9UMnZDMHlOMw==
+
+ola-maps:
+  auth:
+    client-id: f5739601-a4cc-476d-944d-e0657f050fdd
+    client-secret: 8efa2873b6464437b2ed7745f6eddcbc
+    grant-type: client_credentials
+    scope: openid
+  api:
+    base-url: https://api.olamaps.io

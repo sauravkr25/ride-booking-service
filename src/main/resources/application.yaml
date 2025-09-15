@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: Ride Booking Service
+  profiles:
+    active: local
