@@ -24,8 +24,11 @@ public enum ErrorCodes {
     ACCESS_DENIED_INSUFFICIENT_ROLE(HttpStatus.FORBIDDEN, "ERR_403_ROLE", "Access denied: insufficient role/permissions"),
     JWT_AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "ERR_401_JWT", "Invalid or expired JWT token"),
     VEHICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ERR_404_VEHICLE", "Vehicle not found"),
+    RIDE_NOT_FOUND(HttpStatus.NOT_FOUND, "ERR_404_RIDE", "Ride not found"),
     DRIVER_RIDE_CONFLICT(HttpStatus.CONFLICT, "ERR_409_RIDE_CONFLICT", "Driver already has a scheduled ride"),
-
+    RIDE_UPDATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "ERR_400_RIDE_UPDATE", "Ride cannot be updated as it is not in SCHEDULED state."),
+    CANNOT_UPDATE_PAST_RIDE(HttpStatus.CONFLICT, "ERR_409_RIDE_DEPARTED", "Cannot update a ride that has already departed."),
+    INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "ERR_400_STATUS", "Invalid status transition."),
     // --- Server Errors (5xx) ---
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ERR_500", "Internal server error"),
     SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "ERR_503", "Service unavailable"),

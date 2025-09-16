@@ -39,6 +39,7 @@ public class Constants {
         public static final String REGISTER = "/register";
         public static final String GET = "/get";
         public static final String CREATE = "/create";
+        public static final String UPDATE_RIDE = "/update/{rideId}";
         public static final String OLAMAPS_TOKEN = "/olamaps/token";
         public static final String PLACES_GEOCODE = "/places/geocode";
         public static final String PLACES_REVERSE_GEOCODE = "/places/reverse-geocode";

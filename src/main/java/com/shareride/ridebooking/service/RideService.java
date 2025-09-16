@@ -10,5 +10,7 @@ public interface RideService {
 
     RideDomain createRide(RideDomain rideDomain);
 
-    List<RideDomain> getRides (UUID driverId, RideStatus rideStatus);
+    List<RideDomain> getRides (UUID driverId, RideStatus rideStatus, boolean includeHistory);
+
+    RideDomain updateRide(RideDomain rideDomain);
 }

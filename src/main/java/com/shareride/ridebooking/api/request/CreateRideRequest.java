@@ -1,7 +1,7 @@
 package com.shareride.ridebooking.api.request;
 
 import com.shareride.ridebooking.domain.RideDomain;
-import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -19,11 +19,11 @@ public class CreateRideRequest {
     private LocationCoordinateRequest destination;
 
     @NotNull(message = "Departure time is required")
-    @FutureOrPresent(message = "Departure time must be in the future")
+    @Future(message = "Departure time must be in the future")
     private Instant departureTime;
 
     @Min(value = 1, message = "Available seats must be at least 1")
-    private int availableSeats;
+    private Integer availableSeats;
 
     @NotNull
     private UUID vehicleId;

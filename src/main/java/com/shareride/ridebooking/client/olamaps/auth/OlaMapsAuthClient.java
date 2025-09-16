@@ -1,5 +1,10 @@
 package com.shareride.ridebooking.client.olamaps.auth;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -9,6 +14,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.time.Duration;
 import java.time.Instant;
 
 import static com.shareride.ridebooking.utils.Constants.CLIENT_ID;
@@ -23,11 +29,14 @@ import static com.shareride.ridebooking.utils.Constants.SCOPE;
 
 @Component
 public class OlaMapsAuthClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(OlaMapsAuthClient.class);
+
     private final String clientId;
     private final String clientSecret;
     private final String grantType;
     private final String scope;
-    private final OlaMapsAuthApi OlaMapsAuthApi;
+    private final OlaMapsAuthApi olaMapsAuthApi;
 
     private TokenResponse cachedToken;
     private Instant tokenExpiryTime;
@@ -41,22 +50,45 @@ public class OlaMapsAuthClient {
         this.clientSecret = clientSecret;
         this.grantType = grantType;
         this.scope = scope;
-        this.OlaMapsAuthApi = olaMapsAuthApi;
+        this.olaMapsAuthApi = olaMapsAuthApi;
     }
 
-    public TokenResponse getTokenResponse() {
+    public synchronized TokenResponse getTokenResponse() {
         if(cachedToken == null || tokenExpiryTime.isBefore(Instant.now().plusSeconds(60))) {
-            MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-            form.add(GRANT_TYPE, grantType);
-            form.add(SCOPE, scope);
-            form.add(CLIENT_ID, clientId);
-            form.add(CLIENT_SECRET, clientSecret);
-
-            this.cachedToken = OlaMapsAuthApi.getToken(form);
-            this.tokenExpiryTime = Instant.now().plusSeconds(3600); // Assuming token is valid for 1 hour
+            refreshToken();
         }
-
         return cachedToken;
+    }
+
+    private void refreshToken() {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add(GRANT_TYPE, grantType);
+        form.add(SCOPE, scope);
+        form.add(CLIENT_ID, clientId);
+        form.add(CLIENT_SECRET, clientSecret);
+
+        this.cachedToken = olaMapsAuthApi.getToken(form);
+        this.tokenExpiryTime = extractExpiryFromJwt(cachedToken.getAccessToken());
+    }
+
+    private Instant extractExpiryFromJwt(String jwtToken) {
+        try {
+            DecodedJWT decodedJWT = JWT.decode(jwtToken);
+            Instant expiry = decodedJWT.getExpiresAtAsInstant();
+
+            if (expiry == null) {
+                // This case means the token is valid but has no 'exp' claim.
+                logger.error("JWT is valid but does not contain an 'exp' (expiration) claim. Forcing refresh.");
+                return Instant.now();
+            }
+            long secondsRemaining = Duration.between(Instant.now(), expiry).getSeconds();
+            logger.info("Extracted OlaMaps JWT expiry: {})", expiry);
+            return expiry;
+        } catch (JWTDecodeException e) {
+            // This case means the token string itself is malformed.
+            logger.error("Failed to decode JWT token.", e);
+            return Instant.now();
+        }
     }
 
 

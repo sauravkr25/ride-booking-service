@@ -6,11 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Builder
 @Data
 public class RideResponse {
 
+    private UUID rideId;
     private LocationCoordinateResponse origin;
     private LocationCoordinateResponse destination;
     private Instant departureTime;
@@ -21,6 +23,7 @@ public class RideResponse {
 
     public static RideResponse from(RideDomain rideDomain) {
         return RideResponse.builder()
+                .rideId(rideDomain.getRideId())
                 .origin(LocationCoordinateResponse.from(rideDomain.getOrigin()))
                 .destination(LocationCoordinateResponse.from(rideDomain.getDestination()))
                 .departureTime(rideDomain.getDepartureTime())
