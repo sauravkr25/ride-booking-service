@@ -1,4 +1,12 @@
 - vehicle controller: think about update vehicle details api.
 
+- ride should be created with the driver's vehicle only.
+
 - add capacity in register vehicle api.
+
+- when a ride expires/is cancelled, the associated ride requests should also expire.
+
+- past rides filter should be there in get ride request api
+
+-- ensure proper validation between state transition of ride status and request status
 

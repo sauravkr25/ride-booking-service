@@ -1,6 +1,7 @@
 package com.shareride.ridebooking.service;
 
 import com.shareride.ridebooking.domain.RideDomain;
+import com.shareride.ridebooking.dto.SearchRideDto;
 import com.shareride.ridebooking.enums.RideStatus;
 
 import java.util.List;
@@ -13,4 +14,8 @@ public interface RideService {
     List<RideDomain> getRides (UUID driverId, RideStatus rideStatus, boolean includeHistory);
 
     RideDomain updateRide(RideDomain rideDomain);
+
+    List<RideDomain> searchRide(SearchRideDto searchRideDto);
+
+    int cancelPastScheduledRides();
 }

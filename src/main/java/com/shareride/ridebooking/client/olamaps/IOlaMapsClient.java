@@ -1,11 +1,15 @@
 package com.shareride.ridebooking.client.olamaps;
 
-import com.shareride.ridebooking.client.olamaps.response.GeocodeResponse;
-import com.shareride.ridebooking.client.olamaps.response.ReverseGeocodeResponse;
+import com.shareride.ridebooking.client.olamaps.response.OlaDirectionsResponse;
+import com.shareride.ridebooking.client.olamaps.response.OlaGeocodeResponse;
+import com.shareride.ridebooking.client.olamaps.response.OlaReverseGeocodeResponse;
 
 public interface IOlaMapsClient {
 
-    GeocodeResponse getGeocode(String address);
+    OlaGeocodeResponse getGeocode(String address);
 
-    ReverseGeocodeResponse getReverseGeocode(Double lat, Double lng);
+    OlaReverseGeocodeResponse getReverseGeocode(Double lat, Double lng);
+
+    OlaDirectionsResponse getDirections(Double originLat, Double originLng, Double destLat, Double destLng,
+                                        String mode, Boolean trafficMetadata, Boolean steps, Boolean alternatives);
 }

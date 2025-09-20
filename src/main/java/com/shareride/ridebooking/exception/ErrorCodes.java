@@ -25,10 +25,22 @@ public enum ErrorCodes {
     JWT_AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "ERR_401_JWT", "Invalid or expired JWT token"),
     VEHICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ERR_404_VEHICLE", "Vehicle not found"),
     RIDE_NOT_FOUND(HttpStatus.NOT_FOUND, "ERR_404_RIDE", "Ride not found"),
+    RIDE_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "ERR_404_RIDE_REQUEST", "Ride request not found"),
+
+
+    // --- Ride Update Specific Errors ---
     DRIVER_RIDE_CONFLICT(HttpStatus.CONFLICT, "ERR_409_RIDE_CONFLICT", "Driver already has a scheduled ride"),
     RIDE_UPDATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "ERR_400_RIDE_UPDATE", "Ride cannot be updated as it is not in SCHEDULED state."),
     CANNOT_UPDATE_PAST_RIDE(HttpStatus.CONFLICT, "ERR_409_RIDE_DEPARTED", "Cannot update a ride that has already departed."),
     INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "ERR_400_STATUS", "Invalid status transition."),
+
+    // --- Ride Request Specific Errors ---
+    CANNOT_REQUEST_OWN_RIDE(HttpStatus.CONFLICT, "ERR_409_SELF_REQUEST", "You cannot request to join your own ride."),
+    RIDE_NOT_AVAILABLE_FOR_REQUESTS(HttpStatus.CONFLICT, "ERR_409_RIDE_UNAVAILABLE", "This ride is no longer available for booking."),
+    RIDE_IS_FULL(HttpStatus.CONFLICT, "ERR_409_RIDE_FULL", "This ride is full and has no available seats."),
+    RIDE_HAS_DEPARTED(HttpStatus.CONFLICT, "ERR_409_RIDE_DEPARTED", "Cannot request to join a ride that has already departed."),
+    DUPLICATE_RIDE_REQUEST(HttpStatus.CONFLICT, "ERR_409_DUPLICATE_REQUEST", "You have already sent a request to join this ride."),
+
     // --- Server Errors (5xx) ---
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ERR_500", "Internal server error"),
     SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "ERR_503", "Service unavailable"),

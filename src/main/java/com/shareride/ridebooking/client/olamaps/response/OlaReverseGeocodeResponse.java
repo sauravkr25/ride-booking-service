@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ReverseGeocodeResponse {
+public class OlaReverseGeocodeResponse {
 
     @JsonProperty("error_message")
     private String errorMessage;

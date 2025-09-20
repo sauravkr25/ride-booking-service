@@ -1,7 +1,9 @@
 package com.shareride.ridebooking.service.impl;
 
+import com.shareride.ridebooking.config.properties.RideSearchProps;
 import com.shareride.ridebooking.domain.RideDomain;
 import com.shareride.ridebooking.domain.VehicleDomain;
+import com.shareride.ridebooking.dto.SearchRideDto;
 import com.shareride.ridebooking.enums.RideStatus;
 import com.shareride.ridebooking.exception.ApplicationException;
 import com.shareride.ridebooking.exception.ErrorCodes;
@@ -12,9 +14,12 @@ import com.shareride.ridebooking.repository.entity.Vehicle;
 import com.shareride.ridebooking.service.RideService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +35,11 @@ import static com.shareride.ridebooking.utils.JtsUtil.convertToPoint;
 @RequiredArgsConstructor
 public class RideServiceImpl implements RideService {
 
+    private static final Logger logger = LoggerFactory.getLogger(RideServiceImpl.class);
+
     private final RideRepository rideRepository;
     private final VehicleRepository vehicleRepository;
+    private final RideSearchProps rideSearchProps;
 
     @Override
     public RideDomain createRide(RideDomain rideDomain) {
@@ -74,12 +82,7 @@ public class RideServiceImpl implements RideService {
         Ride ride = rideRepository.findById(rideDomain.getRideId())
                 .orElseThrow(() -> ApplicationException.of(ErrorCodes.RIDE_NOT_FOUND));
 
-        if (!ride.getDriverId().equals(rideDomain.getDriverId())) {
-            throw ApplicationException.of(ErrorCodes.FORBIDDEN, Map.of(CAUSE, "User is not the owner of this ride."));
-        }
-        if (ride.getStatus() != RideStatus.SCHEDULED) {
-            throw ApplicationException.of(ErrorCodes.RIDE_UPDATE_NOT_ALLOWED);
-        }
+        validateUpdateRide(ride, rideDomain);
 
         boolean isUpdated = false;
         if (rideDomain.getDepartureTime() != null) {
@@ -104,6 +107,39 @@ public class RideServiceImpl implements RideService {
             ride = rideRepository.save(ride);
         }
         return RideDomain.from(ride);
+    }
+
+    @Override
+    public List<RideDomain> searchRide(SearchRideDto searchRideDto) {
+
+        Instant time = searchRideDto.getTime();
+        Instant startTime = time.minus(rideSearchProps.getTimeWindowMinutes(), ChronoUnit.MINUTES);
+        Instant endTime = time.plus(rideSearchProps.getTimeWindowMinutes(), ChronoUnit.MINUTES);
+
+        List<Ride> candidateRides = rideRepository.findCandidateRides(
+                searchRideDto.getOrigin().getLongitude(),
+                searchRideDto.getOrigin().getLatitude(),
+                rideSearchProps.getOriginRadiusMeters(),
+                searchRideDto.getDestination().getLongitude(),
+                searchRideDto.getDestination().getLatitude(),
+                rideSearchProps.getDestinationRadiusMeters(),
+                startTime,
+                endTime,
+                searchRideDto.getRiderId());
+
+        List<RideDomain> rideDomains = new ArrayList<>();
+        for (var r : candidateRides) {
+            rideDomains.add(RideDomain.from(r));
+        }
+        return rideDomains;
+    }
+
+    @Override
+    public int cancelPastScheduledRides() {
+        logger.info("Starting cleanup job for past scheduled rides...");
+        int updatedCount = rideRepository.cancelPastScheduledRides(Instant.now());
+        logger.info("Cleanup job finished. Cancelled {} rides.", updatedCount);
+        return updatedCount;
     }
 
     private Optional<List<Ride>> getAllRides(UUID driverId, RideStatus rideStatus) {
@@ -135,5 +171,14 @@ public class RideServiceImpl implements RideService {
                 .destination(convertToPoint(rideDomain.getDestination()))
                 .vehicle(vehicleFromDB)
                 .build();
+    }
+
+    public void validateUpdateRide(Ride ride, RideDomain rideDomain) {
+        if (!ride.getDriverId().equals(rideDomain.getDriverId())) {
+            throw ApplicationException.of(ErrorCodes.FORBIDDEN, Map.of(CAUSE, "User is not the owner of this ride."));
+        }
+        if (ride.getStatus() != RideStatus.SCHEDULED) {
+            throw ApplicationException.of(ErrorCodes.RIDE_UPDATE_NOT_ALLOWED);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.shareride.ridebooking.domain;
 
+import com.shareride.ridebooking.enums.VehicleType;
 import com.shareride.ridebooking.repository.entity.Vehicle;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,8 @@ public class VehicleDomain {
     private String registrationNumber;
     private UUID ownerId;
     private UUID vehicleId;
+    private Integer seatCapacity;
+    private VehicleType vehicleType;
 
     public void updateFrom(Vehicle savedVehicle) {
         this.setVehicleId(savedVehicle.getId());
@@ -29,6 +32,8 @@ public class VehicleDomain {
                 .color(vehicle.getColor())
                 .registrationNumber(vehicle.getRegistrationNumber())
                 .ownerId(vehicle.getOwnerId())
+                .seatCapacity(vehicle.getSeatCapacity())
+                .vehicleType(vehicle.getVehicleType())
                 .build();
     }
 }

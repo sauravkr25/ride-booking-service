@@ -9,15 +9,19 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestValueException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.shareride.ridebooking.utils.Constants.CAUSE;
+import static com.shareride.ridebooking.utils.Constants.REASON;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -155,8 +159,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(response);
     }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ApiErrorResponse> handleEnumConversionError(
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<ApiErrorResponse> handleArgumentConversionError(
             MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
 
         var errorCode = ErrorCodes.INVALID_INPUT;
@@ -169,6 +173,51 @@ public class GlobalExceptionHandler {
                 .code(errorCode.getCode())
                 .message(errorCode.getMessage())
                 .details(Map.of(CAUSE, ex.getMostSpecificCause().getMessage() + " for parameter " + ex.getName()))
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler({MissingRequestValueException.class})
+    public ResponseEntity<ApiErrorResponse> handleMissingRequestValueException(
+            MissingRequestValueException ex, HttpServletRequest request) {
+
+        var errorCode = ErrorCodes.INVALID_INPUT;
+        var status = errorCode.getHttpStatus();
+
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .details(Map.of(CAUSE, ex.getMessage()))
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler({HandlerMethodValidationException.class})
+    public ResponseEntity<ApiErrorResponse> handleMethodViolationException(
+            HandlerMethodValidationException ex, HttpServletRequest request) {
+
+        Map<String, String> details = new HashMap<>();
+        ex.getParameterValidationResults().stream()
+                .map(res -> details.put(res.getMethodParameter().getParameterName(),
+                        res.getResolvableErrors().get(0).getDefaultMessage())).toList();
+
+        var errorCode = ErrorCodes.INVALID_INPUT;
+        var status = errorCode.getHttpStatus();
+
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .details(Map.of(CAUSE, details, REASON, ex.getReason()))
                 .path(request.getRequestURI())
                 .build();
 

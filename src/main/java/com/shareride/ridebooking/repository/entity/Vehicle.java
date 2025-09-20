@@ -1,7 +1,10 @@
 package com.shareride.ridebooking.repository.entity;
 
+import com.shareride.ridebooking.enums.VehicleType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,6 +42,13 @@ public class Vehicle {
 
     @Column(nullable = false)
     private String color;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private VehicleType vehicleType;
+
+    @Column(name = "seat_capacity", nullable = false)
+    private Integer seatCapacity;
 
     @Column(name = "registration_number", nullable = false, unique = true)
     private String registrationNumber;

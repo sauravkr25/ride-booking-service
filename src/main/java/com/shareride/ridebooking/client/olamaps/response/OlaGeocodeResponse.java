@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class GeocodeResponse {
+public class OlaGeocodeResponse {
 
     private List<GeocodingResult> geocodingResults;
 

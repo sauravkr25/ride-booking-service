@@ -22,3 +22,9 @@ ola-maps:
     scope: openid
   api:
     base-url: https://api.olamaps.io
+
+ride-search:
+  origin-radius-meters: 2000
+  destination-radius-meters: 5000
+  time-window-minutes: 60
+  minimum-overlap-percentage: 70.0

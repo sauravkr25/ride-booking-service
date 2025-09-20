@@ -48,6 +48,8 @@ public class VehicleServiceImpl implements VehicleService {
                 .color(vehicleDomain.getColor())
                 .registrationNumber(vehicleDomain.getRegistrationNumber())
                 .ownerId(vehicleDomain.getOwnerId())
+                .seatCapacity(vehicleDomain.getSeatCapacity())
+                .vehicleType(vehicleDomain.getVehicleType())
                 .build();
     }
 }

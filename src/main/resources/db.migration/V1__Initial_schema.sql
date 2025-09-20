@@ -71,6 +71,7 @@ COMMENT ON TABLE ride_requests IS 'Links a rider (a User) to a Ride they want to
 
 -- A GIST index is a special type for geospatial data, making proximity searches (like ST_DWithin) extremely fast.
 CREATE INDEX rides_origin_geog_idx ON rides USING GIST (origin);
+CREATE INDEX rides_destination_geog_idx ON rides USING GIST (destination);
 -- A standard B-tree index on departure_time will speed up searches based on a time window.
 CREATE INDEX rides_departure_time_idx ON rides (departure_time);
 
